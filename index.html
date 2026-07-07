@@ -101,6 +101,9 @@
 
   <div class="btn-row">
     <button id="locateBtn">🎯 Use my location</button>
+    <button id="toggleViewBtn">🛰️ Satellite view</button>
+  </div>
+  <div class="btn-row">
     <button id="confirmBtn">✅ Deliver here</button>
   </div>
 
@@ -115,10 +118,16 @@
   const defaultLat = 22.9676, defaultLng = 76.0534;
   const map = L.map('map').setView([defaultLat, defaultLng], 14);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
-  }).addTo(map);
+  });
+  const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri, Maxar, Earthstar Geographics',
+    maxZoom: 19
+  });
+  streetLayer.addTo(map);
+  let onSatellite = false;
 
   const marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
 
@@ -167,6 +176,19 @@
   }
 
   document.getElementById('locateBtn').addEventListener('click', autoLocate);
+
+  document.getElementById('toggleViewBtn').addEventListener('click', function() {
+    onSatellite = !onSatellite;
+    if (onSatellite) {
+      map.removeLayer(streetLayer);
+      satelliteLayer.addTo(map);
+      this.textContent = '🗺️ Map view';
+    } else {
+      map.removeLayer(satelliteLayer);
+      streetLayer.addTo(map);
+      this.textContent = '🛰️ Satellite view';
+    }
+  });
 
   document.getElementById('confirmBtn').addEventListener('click', function() {
     const p = marker.getLatLng();
